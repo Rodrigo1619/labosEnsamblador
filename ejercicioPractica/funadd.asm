@@ -1,9 +1,9 @@
 org 100h
 section .text
 
-;primero limpiamos AX para ver mejor que se guarda 15 = F
+;primero limpiamos AX para ver mejor que se guarda
 mov AX, 0
-mov Al, 15d
+mov Al, 10d
 mov Bl, 5d
 CALL sumaDeNumeros ;MANDANDO A LLAMAR A LA SUBRUTINA
 
@@ -12,27 +12,39 @@ int 20h
 
 ; creacion de la subrutina
 sumaDeNumeros:
+    ;metemos a la pila ax y bx
     push ax
     push bx
 
-    add AL, BL
+    add AL, BL ;sumamos lo que tenemos en al y bl
 
-    CMP AL, 20 ;QUE COMPARE SI EL RESULTADO ES MAYOR A 20
-    CALL imprimir
-    ; si dejo el pop me los saca de la pila y al volver al main solo veo el f y no el 14
-    ;pop BX 
-    ;pop AX 
-    
+    mov cl, 0  ; contador para el bucle
+
+    cmp AL, 20 ;comparamos si el resultado de la suma es mayor, igual o menor a 20
+    JA imprimir  ; si AL es mayor o igual a 20, imprimir directamente JA= JUMP IF ABOVE
+    JB incrementar  ; si AL es menor a 20, pasar a incrementar JB=JUMP IF BELOW
+
+imprimir:
+    CALL imprimirmsg
     ret
 
-;si es igual, vamos a la direccion de memoria d100 para poder ver el mensaje
-imprimir:
+incrementar:
+    add AL, 5 ;SUMAMOS 5 AL RESULTADO
+    inc cl
+
+    cmp AL, 20 ;VOLVEMOS A COMPARAR SI LA CONDICION SE CUMPLE
+    jl incrementar  ; si AL es menor a 20, repetir el incremento
+
+    CALL imprimir ;HASTA QUE NO SE CUMPLE NO LLAMAMOS A IMPRIMIR
+
+    ret
+
+imprimirmsg:
     mov AH, 09H
     LEA DX, msgigual
     int 21h
 
     ret
 
-
-.data:
-    msgigual db 'fin'
+section .data
+    msgigual db 'fin', 0
